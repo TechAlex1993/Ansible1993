@@ -1,0 +1,27 @@
+---
+- name: Update and upgrade Linux servers
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update and upgrade Debian-based systems 
+      apt:
+        update_cache: yes
+        upgrade: dist
+        autoremove: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Update and upgrade Red Hat-based systems (e.g., CentOS)
+      yum:
+        name: "*"
+        state: latest
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Reboot the server if required (for kernel updates)
+      reboot:
+        msg: "Reboot initiated by Ansible for updates"
+        connect_timeout: 5
+        reboot_timeout: 600
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+      when: reboot_required.stat.exists
